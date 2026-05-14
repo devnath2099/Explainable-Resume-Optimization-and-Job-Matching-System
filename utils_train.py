@@ -21,6 +21,7 @@ class TrainingConfig:
     num_epochs: int = 10
     gradient_clip_norm: float = 1.0
     warmup_steps: int = 0
+    early_stopping_patience: int = 4
     seed: int = 42
     save_dir: str = "saved_models"
     log_interval: int = 10

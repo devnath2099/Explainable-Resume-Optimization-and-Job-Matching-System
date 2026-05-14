@@ -5,7 +5,7 @@ from transformers import AutoTokenizer
 from config import ModelConfig
 from dataset import prepare_data_splits
 from model import ResumeJobMatcher, build_model
-from trainer import Trainer
+from trainer import Trainer, EarlyStopping
 from utils_train import (
     SeparateTokenizationDataset,
     TrainingConfig,
@@ -97,12 +97,14 @@ def main() -> None:
     # ------------------------------------------------------------------
     # Trainer
     # ------------------------------------------------------------------
+    early_stopping = EarlyStopping(patience=train_cfg.early_stopping_patience)
     trainer = Trainer(
         model=model,
         train_loader=train_loader,
         val_loader=val_loader,
         optimizer=optimizer,
         scheduler=scheduler,
+        early_stopping=early_stopping,
         device=device,
         gradient_clip_norm=train_cfg.gradient_clip_norm,
         save_dir=train_cfg.save_dir,

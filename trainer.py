@@ -10,6 +10,22 @@ from tqdm import tqdm
 from metrics import compute_metrics
 
 
+class EarlyStopping:
+    def __init__(self, patience: int = 3, min_delta: float = 0.001):
+        self.patience = patience
+        self.min_delta = min_delta
+        self.counter = 0
+        self.best = 0.0
+
+    def step(self, value: float) -> bool:
+        if value > self.best + self.min_delta:
+            self.best = value
+            self.counter = 0
+            return False
+        self.counter += 1
+        return self.counter >= self.patience
+
+
 class FocalLoss(nn.Module):
     def __init__(self, gamma: float = 2.0, reduction: str = "mean"):
         super().__init__()
@@ -33,6 +49,7 @@ class Trainer:
         val_loader: DataLoader,
         optimizer: torch.optim.Optimizer,
         scheduler: Optional[torch.optim.lr_scheduler._LRScheduler] = None,
+        early_stopping: Optional[EarlyStopping] = None,
         device: torch.device = torch.device("cpu"),
         gradient_clip_norm: float = 1.0,
         save_dir: str = "saved_models",
@@ -43,12 +60,13 @@ class Trainer:
         self.val_loader = val_loader
         self.optimizer = optimizer
         self.scheduler = scheduler
+        self.early_stopping = early_stopping
         self.device = device
         self.gradient_clip_norm = gradient_clip_norm
         self.save_dir = save_dir
         self.log_interval = log_interval
 
-        self.criterion = FocalLoss(gamma=2.0)
+        self.criterion = FocalLoss(gamma=1.5)
         self.best_val_f1 = 0.0
 
         os.makedirs(self.save_dir, exist_ok=True)
@@ -172,6 +190,11 @@ class Trainer:
                 self.best_val_f1 = val_metrics["f1"]
                 self._save_checkpoint(epoch, val_metrics)
                 print(f"  \u2713 Best model saved (F1: {val_metrics['f1']:.4f})")
+
+            if self.early_stopping is not None and self.early_stopping.step(val_metrics["f1"]):
+                print(f"  \u23f9 Early stopping triggered (no improvement for "
+                      f"{self.early_stopping.patience} epochs)")
+                break
 
         print(f"\n{'='*54}")
         print(f"  Training complete. Best val F1: {self.best_val_f1:.4f}")
