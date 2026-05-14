@@ -59,17 +59,7 @@ class BiLSTMEncoder(nn.Module):
     def forward(
         self, x: torch.Tensor, mask: Optional[torch.Tensor] = None
     ) -> torch.Tensor:
-        if mask is not None:
-            lengths = mask.sum(dim=1).cpu().long()
-            packed = nn.utils.rnn.pack_padded_sequence(
-                x, lengths, batch_first=True, enforce_sorted=False
-            )
-            packed_out, _ = self.lstm(packed)
-            output, _ = nn.utils.rnn.pad_packed_sequence(
-                packed_out, batch_first=True
-            )
-        else:
-            output, _ = self.lstm(x)
+        output, _ = self.lstm(x)
         return output
 
 
