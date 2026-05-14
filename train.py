@@ -86,12 +86,12 @@ def main() -> None:
         weight_decay=train_cfg.weight_decay,
     )
 
-    total_steps = len(train_loader) * train_cfg.num_epochs
-    scheduler = torch.optim.lr_scheduler.LinearLR(
+    scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(
         optimizer,
-        start_factor=1.0,
-        end_factor=0.0,
-        total_iters=total_steps,
+        mode="max",
+        factor=0.5,
+        patience=2,
+        min_lr=1e-6,
     )
 
     # ------------------------------------------------------------------

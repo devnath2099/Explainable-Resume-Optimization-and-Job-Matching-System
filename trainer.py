@@ -3,10 +3,26 @@ from typing import Dict, Optional
 
 import torch
 import torch.nn as nn
+import torch.nn.functional as F
 from torch.utils.data import DataLoader
 from tqdm import tqdm
 
 from metrics import compute_metrics
+
+
+class FocalLoss(nn.Module):
+    def __init__(self, gamma: float = 2.0, reduction: str = "mean"):
+        super().__init__()
+        self.gamma = gamma
+        self.reduction = reduction
+
+    def forward(self, logits: torch.Tensor, targets: torch.Tensor) -> torch.Tensor:
+        ce = F.cross_entropy(logits, targets, reduction="none")
+        pt = torch.exp(-ce)
+        loss = ((1 - pt) ** self.gamma) * ce
+        if self.reduction == "mean":
+            return loss.mean()
+        return loss.sum()
 
 
 class Trainer:
@@ -32,7 +48,7 @@ class Trainer:
         self.save_dir = save_dir
         self.log_interval = log_interval
 
-        self.criterion = nn.CrossEntropyLoss()
+        self.criterion = FocalLoss(gamma=2.0)
         self.best_val_f1 = 0.0
 
         os.makedirs(self.save_dir, exist_ok=True)
@@ -132,7 +148,10 @@ class Trainer:
             val_loss, val_metrics = self.validate()
 
             if self.scheduler is not None:
-                self.scheduler.step()
+                if isinstance(self.scheduler, torch.optim.lr_scheduler.ReduceLROnPlateau):
+                    self.scheduler.step(val_metrics["f1"])
+                else:
+                    self.scheduler.step()
 
             lr = self.optimizer.param_groups[0]["lr"]
             print(
