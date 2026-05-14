@@ -11,7 +11,7 @@ logger = logging.getLogger(__name__)
 
 DATASET_NAME = "cnamuangtoun/resume-job-description-fit"
 DEFAULT_MODEL_NAME = "bert-base-uncased"
-LABEL_MAP = {"No Fit": 0, "Potential Fit": 1, "Good Fit": 2}
+LABEL_MAP = {"No Fit": 0, "Potential Fit": 1, "Good Fit": 1}
 
 
 class ResumeJobDataset(Dataset):

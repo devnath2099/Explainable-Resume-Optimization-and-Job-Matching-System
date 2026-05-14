@@ -57,11 +57,11 @@ def classwise_metrics(
     return per_class
 
 
-ID_TO_LABEL = {0: "No Fit", 1: "Potential Fit", 2: "Good Fit"}
+ID_TO_LABEL = {0: "No Fit", 1: "Fit"}
 
 
 if __name__ == "__main__":
-    preds = [0, 1, 2, 1, 0, 2, 1, 1]
-    targets = [0, 1, 1, 1, 0, 2, 2, 1]
+    preds = [0, 1, 1, 0, 0, 1, 1, 1]
+    targets = [0, 1, 0, 1, 0, 1, 0, 1]
     print("Macro metrics:", compute_metrics(preds, targets))
-    print("Per-class metrics:", classwise_metrics(preds, targets, 3))
+    print("Per-class metrics:", classwise_metrics(preds, targets, 2))

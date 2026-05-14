@@ -66,7 +66,7 @@ class Trainer:
         self.save_dir = save_dir
         self.log_interval = log_interval
 
-        self.criterion = FocalLoss(gamma=1.5)
+        self.criterion = nn.CrossEntropyLoss()
         self.best_val_f1 = 0.0
 
         os.makedirs(self.save_dir, exist_ok=True)
