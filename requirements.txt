@@ -16,6 +16,9 @@ nltk>=3.8.0
 # PDF parsing
 PyMuPDF>=1.23.0
 
+# UI
+gradio>=4.0.0
+
 # ---------------
 # Optional extras (uncomment if needed)
 # ---------------
